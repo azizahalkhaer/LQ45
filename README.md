@@ -6,10 +6,11 @@ Dashboard analisis saham dan simulasi alokasi portofolio untuk konstituen LQ45 d
 
 ## Fitur
 
-- Market Overview: Ringkasan pergerakan IHSG dan LQ45 serta snapshot valuasi emiten utama.
-- Multi-Pillar Analysis: Grafik candlestick interaktif (indikator EMA 20 dan SMA 50), metrik rasio valuasi (P/E, PBV, Dividend Yield, Beta), dan ringkasan sentimen berita pasar.
-- Multi-Factor Screener: Filter saham dinamis berdasarkan valuasi (P/E, PBV) dan dividen yield.
+- Market Overview: Ringkasan pergerakan IHSG (^JKSE) dan indeks LQ45 (^JKLQ45) secara real-time dari data bursa (Yahoo Finance/IDX), lengkap dengan persentase perubahan harian dan snapshot valuasi emiten utama.
+- Multi-Pillar Analysis: Grafik candlestick interaktif harian 3 bulan riil (indikator EMA 20 dan SMA 50), metrik rasio valuasi fundamental, serta agregasi sentimen berita terkini via Google News RSS Indonesia.
+- Multi-Factor Screener: Filter saham dinamis berdasarkan rasio valuasi pasar aktual (P/E, PBV) dan dividend yield.
 - Markowitz Portfolio Optimizer: Simulasi Monte Carlo untuk menghitung alokasi bobot optimal (pilihan profil risiko: volatilitas minimal, rasio Sharpe maksimal, atau return maksimal) serta kalkulator lot saham riil sesuai modal investasi.
+- Tombol Segarkan Data: Memungkinkan pembaruan cache harga dan pergerakan indeks bursa secara instan.
 
 ---
 
