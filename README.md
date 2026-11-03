@@ -18,6 +18,8 @@ Dashboard analisis saham dan simulasi alokasi portofolio untuk konstituen LQ45 d
 ```text
 ├── streamlit_app.py     # Aplikasi utama Streamlit
 ├── requirements.txt     # Daftar dependensi library Python
+├── .streamlit/
+│   └── config.toml      # Konfigurasi tema gelap & styling Streamlit
 ├── .gitignore           # Filter file rahasia & cache sistem
 ├── .env.example         # Template konfigurasi environment (tanpa secret key)
 └── README.md            # Dokumentasi proyek

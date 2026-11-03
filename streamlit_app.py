@@ -21,7 +21,7 @@ st.markdown("""
     .stApp {
         background-color: #0b0f19;
         color: #f1f5f9;
-        font-family: 'Inter', system-ui, sans-serif;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
     
     /* Neon Text and Accent */
@@ -44,42 +44,62 @@ st.markdown("""
     
     /* Card Glass Panel */
     .glass-panel {
-        background: rgba(15, 23, 42, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
         margin-bottom: 20px;
     }
     
-    /* Tab Styling Override */
+    /* Tab Styling Override - High Contrast & High Visibility */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background-color: rgba(15, 23, 42, 0.4);
-        padding: 6px;
+        gap: 10px;
+        background-color: rgba(15, 23, 42, 0.7) !important;
+        padding: 8px;
         border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        margin-bottom: 24px;
     }
     .stTabs [data-baseweb="tab"] {
         height: 44px;
-        white-space: pre-wrap;
-        background-color: transparent;
-        border-radius: 8px;
-        color: #94a3b8;
-        font-weight: 700;
-        font-size: 14px;
-        border: none;
-        padding: 0px 24px;
-        transition: all 0.3s ease;
+        background-color: rgba(30, 41, 59, 0.7) !important;
+        border-radius: 8px !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        padding: 0px 20px !important;
+        transition: all 0.2s ease-in-out;
+    }
+    .stTabs [data-baseweb="tab"] div,
+    .stTabs [data-baseweb="tab"] p,
+    .stTabs [data-baseweb="tab"] span {
+        color: #e2e8f0 !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        opacity: 1 !important;
     }
     .stTabs [data-baseweb="tab"]:hover {
-        color: #00e1ff;
-        background-color: rgba(255, 255, 255, 0.03);
+        background-color: rgba(0, 225, 255, 0.15) !important;
+        border-color: rgba(0, 225, 255, 0.4) !important;
+    }
+    .stTabs [data-baseweb="tab"]:hover div,
+    .stTabs [data-baseweb="tab"]:hover p,
+    .stTabs [data-baseweb="tab"]:hover span {
+        color: #00e1ff !important;
     }
     .stTabs [aria-selected="true"] {
-        background-color: rgba(0, 225, 255, 0.1) !important;
+        background-color: rgba(0, 225, 255, 0.2) !important;
+        border: 1px solid #00e1ff !important;
+        box-shadow: 0 0 15px rgba(0, 225, 255, 0.3) !important;
+    }
+    .stTabs [aria-selected="true"] div,
+    .stTabs [aria-selected="true"] p,
+    .stTabs [aria-selected="true"] span {
         color: #00e1ff !important;
-        border: 1px solid rgba(0, 225, 255, 0.2) !important;
+        font-weight: 800 !important;
+        text-shadow: 0 0 12px rgba(0, 225, 255, 0.5);
+    }
+    .stTabs [data-baseweb="tab-highlight"] {
+        background-color: #00e1ff !important;
     }
     
     /* Metrics panel */
@@ -222,6 +242,117 @@ with col2:
 
 st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin-top: 10px; margin-bottom: 25px;'>", unsafe_allow_html=True)
 
+# Helper function for rendering high-contrast, beautiful stock tables
+def render_stock_table(df_data):
+    if df_data.empty:
+        st.warning("Tidak ada saham yang cocok dengan kriteria filtering Anda.")
+        return
+        
+    rows_html = ""
+    for idx, (_, row) in enumerate(df_data.iterrows()):
+        bg = "rgba(15, 23, 42, 0.6)" if idx % 2 == 0 else "rgba(30, 41, 59, 0.4)"
+        
+        raw_price = row['Price']
+        price_val = f"Rp {int(raw_price):,}" if isinstance(raw_price, (int, float)) else str(raw_price)
+        
+        raw_mcap = row['Market Cap (IDR)']
+        mcap_val = f"Rp {raw_mcap/1e12:.1f}T" if isinstance(raw_mcap, (int, float)) else str(raw_mcap)
+        
+        pe_val = f"{row['P/E Ratio']}x"
+        pbv_val = f"{row['PBV Ratio']}x"
+        dy_val = f"{row['Div Yield (%)']}%"
+        beta_val = f"{row['Beta']}"
+        
+        # Color coding
+        pe_color = "#00FF85" if (0 < row['P/E Ratio'] < 15) else "#EF4444" if row['P/E Ratio'] > 25 else "#f8fafc"
+        pbv_color = "#00FF85" if row['PBV Ratio'] < 1.5 else "#f8fafc"
+        dy_color = "#00e1ff" if row['Div Yield (%)'] >= 4.0 else "#94a3b8"
+        
+        rows_html += f"""
+        <tr style="background: {bg}; border-bottom: 1px solid rgba(255, 255, 255, 0.08); transition: background 0.15s ease;">
+            <td style="padding: 14px 16px; font-weight: 800; font-family: monospace; font-size: 14px;">
+                <span style="background: rgba(0, 225, 255, 0.15); color: #00e1ff; border: 1px solid rgba(0, 225, 255, 0.35); padding: 4px 10px; border-radius: 6px;">
+                    {row['Ticker']}
+                </span>
+            </td>
+            <td style="padding: 14px 16px; font-weight: 700; color: #ffffff; font-family: monospace; font-size: 14px;">{price_val}</td>
+            <td style="padding: 14px 16px; color: {pe_color}; font-weight: 700; font-size: 13px;">{pe_val}</td>
+            <td style="padding: 14px 16px; color: {pbv_color}; font-weight: 700; font-size: 13px;">{pbv_val}</td>
+            <td style="padding: 14px 16px; color: {dy_color}; font-weight: 700; font-size: 13px;">{dy_val}</td>
+            <td style="padding: 14px 16px; color: #cbd5e1; font-weight: 600; font-size: 13px;">{beta_val}</td>
+            <td style="padding: 14px 16px; color: #94a3b8; font-family: monospace; font-size: 13px;">{mcap_val}</td>
+        </tr>
+        """
+        
+    table_html = f"""
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; overflow-x: auto; margin-top: 12px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="background: rgba(30, 41, 59, 0.9); border-bottom: 2px solid rgba(255, 255, 255, 0.15);">
+                    <th style="padding: 14px 16px; color: #cbd5e1; font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Ticker</th>
+                    <th style="padding: 14px 16px; color: #cbd5e1; font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Harga Terakhir</th>
+                    <th style="padding: 14px 16px; color: #cbd5e1; font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">P/E Ratio</th>
+                    <th style="padding: 14px 16px; color: #cbd5e1; font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">PBV Ratio</th>
+                    <th style="padding: 14px 16px; color: #cbd5e1; font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Div Yield</th>
+                    <th style="padding: 14px 16px; color: #cbd5e1; font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Beta</th>
+                    <th style="padding: 14px 16px; color: #cbd5e1; font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Market Cap</th>
+                </tr>
+            </thead>
+            <tbody>
+                {rows_html}
+            </tbody>
+        </table>
+    </div>
+    """
+    st.markdown(table_html, unsafe_allow_html=True)
+
+# Helper function for rendering high-contrast portfolio allocation table
+def render_portfolio_table(allocations):
+    rows_html = ""
+    for idx, row in enumerate(allocations):
+        bg = "rgba(15, 23, 42, 0.6)" if idx % 2 == 0 else "rgba(30, 41, 59, 0.4)"
+        verdict = row["Verdict"]
+        if verdict == "BUY":
+            badge = "<span style='background: rgba(0, 255, 133, 0.15); color: #00FF85; border: 1px solid rgba(0, 255, 133, 0.35); padding: 4px 10px; border-radius: 6px; font-weight: 800;'>BUY</span>"
+        elif verdict == "SELL":
+            badge = "<span style='background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.35); padding: 4px 10px; border-radius: 6px; font-weight: 800;'>SELL</span>"
+        else:
+            badge = "<span style='background: rgba(245, 158, 11, 0.15); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.35); padding: 4px 10px; border-radius: 6px; font-weight: 800;'>HOLD</span>"
+            
+        rows_html += f"""
+        <tr style="background: {bg}; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+            <td style="padding: 14px 16px; font-weight: 800; font-family: monospace; font-size: 14px;">
+                <span style="background: rgba(0, 225, 255, 0.15); color: #00e1ff; border: 1px solid rgba(0, 225, 255, 0.35); padding: 4px 10px; border-radius: 6px;">
+                    {row['Ticker']}
+                </span>
+            </td>
+            <td style="padding: 14px 16px; font-weight: 700; color: #ffffff; font-family: monospace; font-size: 14px;">{row['Target Weight (%)']}</td>
+            <td style="padding: 14px 16px;">{badge}</td>
+            <td style="padding: 14px 16px; color: #00e1ff; font-weight: 800; font-family: monospace; font-size: 14px;">{row['Lots']} Lot</td>
+            <td style="padding: 14px 16px; color: #ffffff; font-family: monospace; font-weight: 700; font-size: 14px;">{row['Value Alokasi (IDR)']}</td>
+        </tr>
+        """
+        
+    table_html = f"""
+    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; overflow-x: auto; margin-top: 12px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="background: rgba(30, 41, 59, 0.9); border-bottom: 2px solid rgba(255, 255, 255, 0.15);">
+                    <th style="padding: 14px 16px; color: #cbd5e1; font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Ticker</th>
+                    <th style="padding: 14px 16px; color: #cbd5e1; font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Bobot Optimal</th>
+                    <th style="padding: 14px 16px; color: #cbd5e1; font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Rekomendasi</th>
+                    <th style="padding: 14px 16px; color: #cbd5e1; font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Alokasi Lot</th>
+                    <th style="padding: 14px 16px; color: #cbd5e1; font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Total Nilai (IDR)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {rows_html}
+            </tbody>
+        </table>
+    </div>
+    """
+    st.markdown(table_html, unsafe_allow_html=True)
+
 # Tabs
 tab_overview, tab_analysis, tab_screener, tab_portfolio = st.tabs([
     "Market Overview", 
@@ -239,39 +370,35 @@ with tab_overview:
     col_idx1, col_idx2, col_idx3, col_idx4 = st.columns(4)
     with col_idx1:
         st.markdown("""
-        <div class="glass-panel" style="padding:16px;">
-            <p style="color:#64748b; font-size:11px; font-weight:700; text-transform:uppercase; margin-bottom:4px;">IHSG Index (Composite)</p>
-            <p class="metric-value neon-green">7,322.40 <span style="font-size:14px; font-weight:normal;">+0.82%</span></p>
+        <div class="glass-panel" style="padding:18px;">
+            <p style="color:#94a3b8; font-size:12px; font-weight:700; text-transform:uppercase; margin-bottom:6px; letter-spacing: 0.05em;">IHSG Index (Composite)</p>
+            <p class="metric-value neon-green">7,322.40 <span style="font-size:14px; font-weight:normal; margin-left: 6px;">+0.82%</span></p>
         </div>
         """, unsafe_allow_html=True)
     with col_idx2:
         st.markdown("""
-        <div class="glass-panel" style="padding:16px;">
-            <p style="color:#64748b; font-size:11px; font-weight:700; text-transform:uppercase; margin-bottom:4px;">LQ45 Index</p>
-            <p class="metric-value neon-green">1,012.15 <span style="font-size:14px; font-weight:normal;">+1.14%</span></p>
+        <div class="glass-panel" style="padding:18px;">
+            <p style="color:#94a3b8; font-size:12px; font-weight:700; text-transform:uppercase; margin-bottom:6px; letter-spacing: 0.05em;">LQ45 Index</p>
+            <p class="metric-value neon-green">1,012.15 <span style="font-size:14px; font-weight:normal; margin-left: 6px;">+1.14%</span></p>
         </div>
         """, unsafe_allow_html=True)
     with col_idx3:
         st.markdown("""
-        <div class="glass-panel" style="padding:16px;">
-            <p style="color:#64748b; font-size:11px; font-weight:700; text-transform:uppercase; margin-bottom:4px;">Top Bullish Sentiment</p>
-            <p class="metric-value neon-cyan">BBCA <span style="font-size:14px; font-weight:normal; color:#94a3b8;">+0.75 Score</span></p>
+        <div class="glass-panel" style="padding:18px;">
+            <p style="color:#94a3b8; font-size:12px; font-weight:700; text-transform:uppercase; margin-bottom:6px; letter-spacing: 0.05em;">Top Bullish Sentiment</p>
+            <p class="metric-value neon-cyan">BBCA <span style="font-size:14px; font-weight:normal; color:#cbd5e1; margin-left: 6px;">+0.75 Score</span></p>
         </div>
         """, unsafe_allow_html=True)
     with col_idx4:
         st.markdown("""
-        <div class="glass-panel" style="padding:16px;">
-            <p style="color:#64748b; font-size:11px; font-weight:700; text-transform:uppercase; margin-bottom:4px;">Market Volatility (VIX Equival.)</p>
-            <p class="metric-value neon-orange">11.45% <span style="font-size:14px; font-weight:normal;">Low Risk</span></p>
+        <div class="glass-panel" style="padding:18px;">
+            <p style="color:#94a3b8; font-size:12px; font-weight:700; text-transform:uppercase; margin-bottom:6px; letter-spacing: 0.05em;">Market Volatility (VIX Equival.)</p>
+            <p class="metric-value neon-orange">11.45% <span style="font-size:14px; font-weight:normal; margin-left: 6px;">Low Risk</span></p>
         </div>
         """, unsafe_allow_html=True)
         
     st.markdown("### LQ45 Heavyweight Snapshot")
-    
-    disp_df = df_stocks.copy()
-    disp_df["Price"] = disp_df["Price"].map(lambda x: f"Rp {x:,}")
-    disp_df["Market Cap (IDR)"] = disp_df["Market Cap (IDR)"].map(lambda x: f"Rp {x/1e12:.1f}T")
-    st.dataframe(disp_df, use_container_width=True, hide_index=True)
+    render_stock_table(df_stocks)
 
 # ================= TAB 2: ANALYSIS =================
 with tab_analysis:
@@ -410,10 +537,7 @@ with tab_screener:
     if filtered_df.empty:
         st.warning("Tidak ada saham yang cocok dengan kriteria filtering Anda.")
     else:
-        disp_filtered = filtered_df.copy()
-        disp_filtered["Price"] = disp_filtered["Price"].map(lambda x: f"Rp {x:,}")
-        disp_filtered["Market Cap (IDR)"] = disp_filtered["Market Cap (IDR)"].map(lambda x: f"Rp {x/1e12:.1f}T")
-        st.dataframe(disp_filtered, use_container_width=True, hide_index=True)
+        render_stock_table(filtered_df)
 
 # ================= TAB 4: PORTFOLIO =================
 with tab_portfolio:
@@ -583,7 +707,7 @@ with tab_portfolio:
                         "Value Alokasi (IDR)": f"Rp {total_required:,}"
                     })
                     
-                st.dataframe(pd.DataFrame(allocation_data), use_container_width=True, hide_index=True)
+                render_portfolio_table(allocation_data)
                 
                 remaining_cash = budget - total_spent
                 st.markdown(f"""
