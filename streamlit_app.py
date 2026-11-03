@@ -135,7 +135,7 @@ def generate_stock_fundamentals():
                 "pbv": pbv_val,
                 "dy": dy_val,
                 "beta": beta_val,
-                "market_cap": base_p * random.randint(100e6, 5e9)
+                "market_cap": base_p * random.randint(100_000_000, 5_000_000_000)
             }
         data.append({
             "Ticker": s,
